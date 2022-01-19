@@ -20,6 +20,7 @@ tools-> manage packages for micropython
 
 https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
 runterladen und ins lib verzeichnis speichern
+Docu dazu: https://micropython-pca9685.readthedocs.io/en/latest/pca9685.html
 
 # urls
 
