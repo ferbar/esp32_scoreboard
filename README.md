@@ -20,3 +20,17 @@ tools-> manage packages for micropython
 
 https://github.com/adafruit/micropython-adafruit-pca9685/blob/master/pca9685.py
 runterladen und ins lib verzeichnis speichern
+
+# urls
+
+platine 1+2 initen mit I2C Adresse 42 und 40
+
+http://192.168.178.165/initleds?66&64
+
+2 zeichen string senden, startpos 0
+
+http://192.168.178.165/setleds?p=0&s=11
+
+i2cscan
+
+http://192.168.178.165/i2cscan
