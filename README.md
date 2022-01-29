@@ -12,6 +12,9 @@ zypper install python3-tk python3-websockets
 
 pip3 install thonny
 
+Workflow:
+scoreboard + main.py aus diesem Repo öffnen, am Device speichern. Bei Änderungen "Save copy..." im git repo, "normales" Save. Sollte sich Thonny aufregen dass das Device busy ist unten in die Shell klicken und CTRL + C. [STOP] ist nicht notwendig
+
 ## Settings:
 https://randomnerdtutorials.com/getting-started-thonny-micropython-python-ide-esp32-esp8266/
 
