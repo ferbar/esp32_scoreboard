@@ -42,3 +42,6 @@ http://192.168.178.165/initleds?0x42&0x40
 
 http://192.168.178.165/setleds?p=0&s=11
 
+. setzen / löschen
+http://192.168.178.165/setleds?p=0&s=.1_1
+

@@ -86,7 +86,7 @@ def setLeds(querystring):
             print("  print string %s" % kv[1])
             s=kv[1]
             for c in s:
-                if c == ' ':
+                if c == '_':
                     setDot(pos, False)
                 elif c == '.':
                     setDot(pos, True)
