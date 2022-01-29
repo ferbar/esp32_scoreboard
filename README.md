@@ -29,14 +29,16 @@ Docu dazu: https://micropython-pca9685.readthedocs.io/en/latest/pca9685.html
 
 # urls
 
+i2cscan - welche i2c Devices sind angehängt?
+
+http://192.168.178.165/i2cscan
+
 platine 1+2 initen mit I2C Adresse 42 und 40
 
 http://192.168.178.165/initleds?66&64
+http://192.168.178.165/initleds?0x42&0x40
 
 2 zeichen string senden, startpos 0
 
 http://192.168.178.165/setleds?p=0&s=11
 
-i2cscan
-
-http://192.168.178.165/i2cscan
