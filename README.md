@@ -48,3 +48,7 @@ http://192.168.178.165/setleds?p=0&s=11
 . setzen / löschen
 http://192.168.178.165/setleds?p=0&s=.1_1
 
+&b=brightness (0...4095)
+&c=0x20 => über hex die bits setzen (umgekehrte reihenfolge: A=höchstes bit, 1=punkt)
+
+&s &c &b können gemischt und wiederholt werden
