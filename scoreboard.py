@@ -43,32 +43,52 @@ charSegments = [
 ]
 
 def setDot(pos, on):
+    global duty
     print("setDot %d %d" %(pos,on))
     board=int(pos/2)
     digit=int(pos%2)
     print("   board=%d digit=%d boardlen=%d" % (board, digit, len(addrMapping) ))
-    value=duty if on else duty
-    port=0
+    value=duty if on else 0
+    port=7+(digit*8)
     print("setting %d to %d" % (port, value) )
     addrMapping[board].duty(port, value)
 
 # char int(0) .. int(15)
-def setChar(pos, c):
+def setChar(pos, c, hex=False):
+    global duty
     print("setChar %d %d" %(pos,c))
-    if c < 0 or c > len(charSegments):
-        raise Exception("invalid char %d" % c)
+    
     board=int(pos/2)
     digit=int(pos%2)
     print("   board=%d digit=%d boardlen=%d" % (board, digit, len(addrMapping) ))
     #if board < len(addrMapping) ... let it throw exception
     
-    charSegment=charSegments[c]
+    if not hex:
+        if c < 0 or c > len(charSegments):
+            raise Exception("invalid char %d" % c)
+        charSegment=charSegments[c]
+        r = 7
+    else:
+        charSegment = c
+        r = 8
     
-    for i in range(7):
+    for i in range(r):
         port=i+(digit*8)
         value=duty if charSegment & ( 1 << (7-i) ) else 0
         print("setting %d to %d" % (port, value) )
         addrMapping[board].duty(port, value)
+
+# char int(0) .. int(15)
+def setDuty(querystring):  
+    global duty
+    print("setDuty %d" %(duty))
+    d = int(querystring)
+    if d > 4095:
+        d = 4095
+    if d < 0:
+        d = 0
+    duty=d
+    return ( "setDutys@%d" % (duty) )
 
 # p ... startpos
 # s ... string "123456" " " für punkt löschen "." für punkt setzen
@@ -82,6 +102,13 @@ def setLeds(querystring):
         if kv[0]=="p":
             print("  Setting pos to %s" % kv[1])
             pos=int(kv[1])
+        elif kv[0]=="b":
+            print("  Setting duty to %s" % kv[1])                        
+            setDuty(kv[1])
+        elif kv[0]=="c":
+            print("  setting hex string %s" % kv[1])
+            setChar(pos, int(kv[1],0), hex=True)
+            pos += 1
         elif kv[0]=='s':
             print("  print string %s" % kv[1])
             s=kv[1]
@@ -150,6 +177,8 @@ while True:
             response=initLeds(querystring)
         elif(method=="GET" and url=="/i2cscan"):
             response=I2CScan(querystring)
+        elif(method=="GET" and url=="/setbrightness"):
+            response=setDuty(querystring)
         elif(method=="GET" and url=="/favicon.ico"):
             response="favicon"
         else:
