@@ -36,6 +36,8 @@ i2cscan - welche i2c Devices sind angehängt?
 
 http://192.168.178.165/i2cscan
 
+scannt alle I2C Adressen (0 -> 127) und listet sie auf
+
 platine 1+2 initen mit I2C Adresse 42 und 40
 
 http://192.168.178.165/initleds?66&64
