@@ -18,8 +18,6 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 
-//const char* mqttUser = "user";
-//const char* mqttPassword = "pass";
 const char* mqttTopicIn = "esp-8266-in/#";
 const char* mqttTopicOut = "esp-8266-out";
 
@@ -54,6 +52,23 @@ void callback(const char* topic, byte* payload, unsigned int payloadLen) {
   }
   strncpy(spayload, (const char*) payload, payloadLen);
   if(strcmp(subtopic, "init")==0) {  // payload=0x63,0x64, ...\0
+    Serial.printf("init: payload len=%d\n", payloadLen);
+    digitalWrite(12, 1);
+    nBoards=0;
+    for(unsigned int i = 0; i < payloadLen; i++) {
+      int boardAddr=payload[i];
+      Serial.printf("init board[%d] @%d\n", nBoards, boardAddr);
+      if(boards[nBoards]) delete(boards[nBoards]);
+      boards[nBoards]=new PCA9685(boardAddr);
+      boards[nBoards]->setFrequency(1000);
+
+      nBoards++;
+      if(nBoards >= 10) {
+        info="too many boards";
+        goto error;
+      }
+    }
+    /*
     char *pos=spayload;
     char *laststart=pos;
     while(*pos) {
@@ -62,33 +77,30 @@ void callback(const char* topic, byte* payload, unsigned int payloadLen) {
         nBoards=0;
         char *endptr=NULL;
         int boardAddr=strtol(laststart, &endptr,0);
-        Serial.printf("init board[%d] @%d", nBoards, boardAddr);
-        if(boards[nBoards]) delete(boards[nBoards]);
-        boards[nBoards]=new PCA9685(boardAddr);
-        nBoards++;
-        if(nBoards >= 10) {
-          info="too many boards";
-          goto error;
-        }
       }
     }
-  } else if(strcmp(subtopic, "setbrightness")) {
+    */
+  } else if(strcmp(subtopic, "setbrightness")==0) {
     brightness=atol(spayload);
-  } else if(strcmp(subtopic, "set")) {
+    Serial.printf("set brightness=%d\n", brightness);
+  } else if(strcmp(subtopic, "set")==0) {
     if((signed) payloadLen > nBoards*2) {
       info="string too long";
       goto error;
     }
+    Serial.printf("set: payload len=%d\n", payloadLen);
     for(unsigned int i = 0; i < payloadLen; i++) {
       if(payload[i] != currSegments[i]) {
         int boardNr=i/2;
         int ab=i%2;
         for(int b = 0; b < 8; b++) {
+          Serial.printf("   segment[%d:%d]=>%d\n", boardNr, b+ab*8, currSegments[i] & (1 << b) ? brightness : 0);
           if((payload[i] & (1 << b)) != (currSegments[i] & (1 << b))) {
             Serial.printf("set segment[%d:%d]=%d\n", boardNr, b+ab*8, currSegments[i] & (1 << b) ? brightness : 0);
             boards[boardNr]->setPWM(b+(ab*8), currSegments[i] & (1 << b) ? brightness : 0);
           }
         }
+        currSegments[i]=payload[i];
       }
     }
   } else {
@@ -149,8 +161,8 @@ void connect() {
   while (!mqttClient.connected()) {
     Serial.print("Attempting MQTT connection...");
     String mqttClientId = "";
-//     if (mqttClient.connect(mqttClientId.c_str(), mqttUser, mqttPassword)) {
-    if (mqttClient.connect(mqttClientId.c_str())) {
+    if (mqttClient.connect(mqttClientId.c_str(), mqttUser, mqttPassword, mqttTopicOut, 2, false, "disconnected")) {
+//     if (mqttClient.connect(mqttClientId.c_str())) {
       Serial.println("connected");
       mqttClient.subscribe(mqttTopicIn);
       mqttClient.publish(mqttTopicOut,"connected");
