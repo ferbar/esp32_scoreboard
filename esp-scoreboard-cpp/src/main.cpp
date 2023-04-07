@@ -60,7 +60,9 @@ void callback(const char* topic, byte* payload, unsigned int payloadLen) {
       Serial.printf("init board[%d] @%d\n", nBoards, boardAddr);
       if(boards[nBoards]) delete(boards[nBoards]);
       boards[nBoards]=new PCA9685(boardAddr);
+      boards[nBoards]->begin();
       boards[nBoards]->setFrequency(1000);
+      boards[nBoards]->allOFF();
 
       nBoards++;
       if(nBoards >= 10) {
@@ -93,12 +95,13 @@ void callback(const char* topic, byte* payload, unsigned int payloadLen) {
       if(payload[i] != currSegments[i]) {
         int boardNr=i/2;
         int ab=i%2;
+        Serial.printf("curr byte: %x\n", payload[i]);
         for(int b = 0; b < 8; b++) {
           Serial.printf("   segment[%d:%d]=>%d\n", boardNr, b+ab*8, currSegments[i] & (1 << b) ? brightness : 0);
-          if((payload[i] & (1 << b)) != (currSegments[i] & (1 << b))) {
-            Serial.printf("set segment[%d:%d]=%d\n", boardNr, b+ab*8, currSegments[i] & (1 << b) ? brightness : 0);
-            boards[boardNr]->setPWM(b+(ab*8), currSegments[i] & (1 << b) ? brightness : 0);
-          }
+ //         if((payload[i] & (1 << b)) != (currSegments[i] & (1 << b))) {
+            Serial.printf("set segment[%d:%d]=%d\n", boardNr, b+ab*8, payload[i] & (1 << b) ? brightness : 0);
+            boards[boardNr]->setPWM(b+(ab*8), payload[i] & (1 << b) ? brightness : 0);
+ //         }
         }
         currSegments[i]=payload[i];
       }
@@ -147,6 +150,9 @@ void setup()
   pinMode(15, OUTPUT);
   Serial.begin(75400);
   Serial.print("setup()\n");
+  Serial.println("init I2C");
+  Wire.begin(4,5);
+  
 
   setup_wifi();
   mqttClient.setServer(mqtt_server, mqtt_server_port);
